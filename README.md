@@ -1,4 +1,8 @@
 # StepForward (ก้าวต่อ) 🚀
+[![Node.js CI](https://github.com/IbankXD/TIIS-StepForward/actions/workflows/test.yml/badge.svg)](https://github.com/IbankXD/TIIS-StepForward/actions/workflows/test.yml)
+[![Tests Passing](https://img.shields.io/badge/tests-4%2F4%20passing-brightgreen.svg)](https://github.com/IbankXD/TIIS-StepForward)
+[![Node.js Version](https://img.shields.io/badge/node-%3E%3D18.0.0-blue.svg)](https://nodejs.org/)
+
 ### ระบบติดตามและช่วยเหลือผู้เรียนรายบุคคลในโครงการนำร่อง (Smart Helpdesk & Silent-Dropout Prevention System)
 **บริษัท เทค อินฟินิตี้ อินเตอร์เนชั่นแนล โซลูชั่น จำกัด (TIIS)**  
 **ตำแหน่งที่สมัคร:** Software Developer Trainee  
