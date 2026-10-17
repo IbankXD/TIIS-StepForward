@@ -1,0 +1,22 @@
+{
+  "name": "stepforward-tiis",
+  "version": "1.0.0",
+  "description": "StepForward - ระบบติดตามและช่วยเหลือผู้เรียนรายบุคคลในโครงการนำร่อง (Smart Helpdesk & Silent-Dropout Prevention)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node tests/run-tests.js"
+  },
+  "keywords": [
+    "helpdesk",
+    "education",
+    "pilot-project",
+    "triage",
+    "retention"
+  ],
+  "author": "Siwat Kaewnongsang",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}

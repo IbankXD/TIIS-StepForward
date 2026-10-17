@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StepForward - Mentor Triage Dashboard (สำหรับทีมงาน 3 คน)</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    .ticket-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 0.88rem;
+    }
+    .ticket-table th, .ticket-table td {
+      padding: 12px 10px;
+      text-align: left;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    .ticket-table th {
+      background: var(--gray-100);
+      font-weight: 700;
+      color: var(--gray-800);
+    }
+    .ticket-table tr:hover {
+      background: var(--gray-50);
+    }
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 16px;
+    }
+    .modal-card {
+      background: white;
+      border-radius: var(--radius);
+      max-width: 550px;
+      width: 100%;
+      padding: 24px;
+      box-shadow: var(--shadow-lg);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="index.html" class="logo">
+      <span>🚀 StepForward</span>
+      <span class="logo-badge">Mentor Dashboard</span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">📱 มุมมองผู้เรียน (Learner)</a>
+      <a href="mentor.html" class="nav-link active">🖥️ มุมมองทีมงาน (Mentor Triage)</a>
+    </div>
+  </header>
+
+  <main class="container-wide">
+
+    <!-- แถบ Header ประจำตัวพี่เลี้ยง -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
+      <div>
+        <h1 style="font-size: 1.5rem; font-weight: 800;">ศูนย์คัดกรองและติดตามผู้เรียน (Triage & Retention)</h1>
+        <p style="font-size: 0.9rem; color: var(--gray-600);">
+          เครื่องมือช่วยทีมหลัก 3 คน ดูแลผู้เข้าร่วม 60 คน ได้อย่างทั่วถึงและทันท่วงที
+        </p>
+      </div>
+
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <label for="currentMentorSelect" style="margin-bottom: 0; font-size: 0.88rem;">พี่เลี้ยงที่กำลังปฏิบัติงาน:</label>
+        <select id="currentMentorSelect" style="width: auto; padding: 6px 10px; font-size: 0.9rem;">
+          <option value="พี่เอ (ทีมหลัก)">พี่เอ (ทีมหลัก)</option>
+          <option value="พี่บี (ทีมหลัก)">พี่บี (ทีมหลัก)</option>
+          <option value="พี่ซี (ทีมหลัก)">พี่ซี (ทีมหลัก)</option>
+        </select>
+        <button class="btn btn-outline btn-sm" id="btnResetData" title="รีเซ็ตข้อมูล Mock 60 คนเพื่อทดสอบใหม่">🔄 รีเซ็ตข้อมูล</button>
+      </div>
+    </div>
+
+    <!-- 1. Stats Overview Cards -->
+    <div class="stats-grid">
+      <div class="stat-box" style="border-top: 4px solid var(--primary);">
+        <div class="stat-num" id="statTotalLearners">60</div>
+        <div class="stat-desc">👥 ผู้เรียนทั้งหมดในโครงการ</div>
+      </div>
+      <div class="stat-box" style="border-top: 4px solid var(--danger);">
+        <div class="stat-num" id="statCriticalTickets" style="color: var(--danger);">0</div>
+        <div class="stat-desc">🚨 ตั๋วคำขอด่วนมาก (Critical)</div>
+      </div>
+      <div class="stat-box" style="border-top: 4px solid var(--warning);">
+        <div class="stat-num" id="statPendingTickets" style="color: var(--warning);">0</div>
+        <div class="stat-desc">⏳ ตั๋วที่ยังรอดำเนินการ (Open)</div>
+      </div>
+      <div class="stat-box" style="border-top: 4px solid #ea580c;">
+        <div class="stat-num" id="statDropoutRisk" style="color: #ea580c;">0</div>
+        <div class="stat-desc">⚠️ ผู้เรียนเสี่ยงหลุด (เงียบ > 3 วัน)</div>
+      </div>
+    </div>
+
+    <!-- 2. กล่องเตือนภัยเชิงรุก: ผู้เรียนที่เงียบเกิน 3 วัน (Silent Dropout Prevention) -->
+    <section class="card" style="border-left: 4px solid #ea580c;">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <div>
+          <h2 class="card-title" style="color: #c2410c; margin-bottom: 2px;">
+            ⚠️ ระบบเตือนภัยเชิงรุก: ผู้เรียนที่ไม่ได้ส่งสัญญาณเกิน 3 วัน
+          </h2>
+          <p style="font-size: 0.85rem; color: var(--gray-600);">
+            กลุ่มนี้อาจกำลังถอดใจหรือติดปัญหาแต่ไม่กล้าบอก ทีมงาน 3 คนควรกระจายกันทักทายหรือส่งข้อความให้กำลังใจ
+          </p>
+        </div>
+        <span class="badge badge-high" id="dropoutBadge">ตรวจพบ 0 คน</span>
+      </div>
+
+      <div id="dropoutLearnersList" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px;">
+        <!-- รายชื่อผู้เรียนเสี่ยงหลุดจะถูก Render ที่นี่ -->
+      </div>
+    </section>
+
+    <!-- 3. คิวคำขอความช่วยเหลือ (Triage & Ticket Queue) -->
+    <section class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <h2 class="card-title" style="margin-bottom: 0;">📋 คิวคำขอความช่วยเหลือ (Triage Queue)</h2>
+        <div style="display: flex; gap: 6px;">
+          <button class="btn btn-sm btn-outline active-filter" onclick="filterTickets('ALL')">ทั้งหมด</button>
+          <button class="btn btn-sm btn-outline" onclick="filterTickets('OPEN')">รอดำเนินการ</button>
+          <button class="btn btn-sm btn-outline" onclick="filterTickets('ASSIGNED')">กำลังช่วยเหลือ</button>
+          <button class="btn btn-sm btn-outline" onclick="filterTickets('RESOLVED')">แก้ไขแล้ว</button>
+        </div>
+      </div>
+
+      <div style="overflow-x: auto; margin-top: 14px;">
+        <table class="ticket-table">
+          <thead>
+            <tr>
+              <th>รหัสตั๋ว</th>
+              <th>ระดับ</th>
+              <th>ผู้เรียน / อุปกรณ์</th>
+              <th>หมวดหมู่ & อาการ</th>
+              <th>สถานะ</th>
+              <th>ผู้รับผิดชอบ</th>
+              <th style="text-align: right;">การจัดการ</th>
+            </tr>
+          </thead>
+          <tbody id="ticketTableBody">
+            <!-- ข้อมูลตารางจะถูก Render ที่นี่ -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modal สำหรับรับเคสและปิดเคส -->
+  <div class="modal-overlay" id="actionModal">
+    <div class="modal-card">
+      <h3 style="font-size: 1.2rem; font-weight: 700;" id="modalTicketTitle">จัดการตั๋วความช่วยเหลือ</h3>
+      <div id="modalTicketDetails" style="background: var(--gray-100); border-radius: 8px; padding: 12px; margin: 12px 0; font-size: 0.88rem;"></div>
+
+      <form id="modalForm">
+        <input type="hidden" id="modalTicketId">
+
+        <div class="form-group">
+          <label>เปลี่ยนสถานะ:</label>
+          <select id="modalStatusSelect">
+            <option value="ASSIGNED">พี่เลี้ยงรับดูแลเคสนี้ (ASSIGNED)</option>
+            <option value="RESOLVED">แก้ไขเสร็จสิ้นและแนะนำก้าวต่อ (RESOLVED)</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="groupMentorNote">
+          <label>บันทึกภายในสำหรับทีมงาน (Optional):</label>
+          <input type="text" id="modalMentorNote" placeholder="เช่น นัดโทรคุย 10 นาที หรือส่งตัวอย่างโค้ด">
+        </div>
+
+        <div class="form-group" id="groupResolutionAction">
+          <label>💡 แนวทางก้าวต่อไปสำหรับผู้เรียน <span style="color: var(--danger);">*</span>:</label>
+          <textarea id="modalResolutionAction" rows="3" placeholder="ระบุวิธีแก้ไขปัญหาหรือคำแนะนำให้ผู้เรียนลองทำตาม เช่น ลบแคช หรือใช้ลิงก์ Replit"></textarea>
+          <div class="helper-text">ข้อความนี้จะแสดงในหน้าจอมือถือของผู้เรียน เพื่อให้ผู้เรียนทราบว่าต้องทำอะไรต่อ</div>
+        </div>
+
+        <div id="modalAlertArea" style="margin-bottom: 12px;"></div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 8px;">
+          <button type="button" class="btn btn-outline" onclick="closeModal()">ยกเลิก</button>
+          <button type="submit" class="btn btn-primary" id="btnSaveModal">บันทึกข้อมูล</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="mentor.js"></script>
+</body>
+</html>
