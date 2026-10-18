@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StepForward - ระบบช่วยเหลือผู้เรียนโครงการนำร่อง TIIS</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <header>
+    <a href="index.html" class="logo">
+      <span>🚀 StepForward</span>
+      <span class="logo-badge">TIIS Pilot 2026</span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link active">📱 มุมมองผู้เรียน (Learner)</a>
+      <a href="mentor.html" class="nav-link">🖥️ มุมมองทีมงาน (Mentor Triage)</a>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- 1. กล่องระบุตัวตนผู้เรียน (Learner Identification) -->
+    <section class="card">
+      <h2 class="card-title">👤 เข้าใช้งานด้วยรหัสผู้เรียน</h2>
+      <p style="font-size: 0.9rem; color: var(--gray-600); margin-bottom: 12px;">
+        กรอกรหัสผู้เรียนของคุณ (เช่น STU-001 ถึง STU-060) หรือเลือกรหัสตัวอย่างเพื่อทดสอบ:
+      </p>
+      
+      <div style="display: flex; gap: 8px;">
+        <input type="text" id="inputLearnerId" placeholder="เช่น STU-001" style="text-transform: uppercase;">
+        <button class="btn btn-primary" id="btnLoadLearner" style="white-space: nowrap;">ค้นหาข้อมูล</button>
+      </div>
+
+      <div class="chip-group">
+        <span style="font-size: 0.8rem; color: var(--gray-600); align-self: center;">ตัวอย่างผู้เรียน:</span>
+        <button class="chip" onclick="quickSelectLearner('STU-001')">STU-001 (ปกติ)</button>
+        <button class="chip" onclick="quickSelectLearner('STU-005')">STU-005 (มีตั๋วค้าง/มือถือ)</button>
+        <button class="chip" onclick="quickSelectLearner('STU-008')">STU-008 (เสี่ยงหลุด/เงียบ 4 วัน)</button>
+      </div>
+
+      <div id="learnerAlertArea" style="margin-top: 14px;"></div>
+    </section>
+
+    <!-- 2. ข้อมูลโปรไฟล์ & ความคืบหน้า 14 วัน (จะแสดงเมื่อโหลดรหัสสำเร็จ) -->
+    <section id="learnerProfileSection" class="card" style="display: none;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px;">
+        <div>
+          <h2 id="learnerName" style="font-size: 1.25rem; font-weight: 700;">ชื่อผู้เรียน</h2>
+          <div style="font-size: 0.88rem; color: var(--gray-600); margin-top: 2px;">
+            <span id="learnerTrack">หลักสูตร</span> | อุปกรณ์หลัก: <strong id="learnerDevice">-</strong>
+          </div>
+        </div>
+        <span id="learnerStatusBadge" class="badge">ACTIVE</span>
+      </div>
+
+      <div style="margin-top: 16px;">
+        <div style="display: flex; justify-content: space-between; font-size: 0.88rem; font-weight: 600;">
+          <span>เป้าหมาย 14 วันหลังอบรม</span>
+          <span id="progressText">0 / 14 วัน</span>
+        </div>
+        <div class="progress-container">
+          <div id="progressBar" class="progress-bar" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <!-- กล่องเช็คอินประจำวันสั้นๆ (Daily 1-Minute Pulse) -->
+      <div style="background: var(--gray-50); border: 1px dashed var(--gray-300); border-radius: 8px; padding: 14px; margin-top: 14px;">
+        <div style="font-weight: 600; font-size: 0.95rem; margin-bottom: 8px;">
+          📅 เช็คอินประจำวัน: วันนี้การนำทักษะไปใช้ของคุณเป็นอย่างไรบ้าง?
+        </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button class="btn btn-success btn-sm" onclick="submitCheckin('good')">✅ ไปต่อได้ราบรื่น (+1 วัน)</button>
+          <button class="btn btn-outline btn-sm" style="color: var(--danger); border-color: var(--danger);" onclick="scrollToTicketForm()">⚠️ ติดปัญหา ต้องการความช่วยเหลือ</button>
+        </div>
+        <div id="checkinFeedback" style="font-size: 0.82rem; color: var(--success); margin-top: 6px; display: none;"></div>
+      </div>
+    </section>
+
+    <!-- 3. สถานะคำขอความช่วยเหลือปัจจุบัน (Active Ticket Card) -->
+    <section id="activeTicketSection" class="card" style="display: none; border-left: 4px solid var(--primary);">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3 class="card-title" style="margin-bottom: 0;">📌 สถานะคำขอความช่วยเหลือล่าสุด</h3>
+        <span id="activeTicketStatusBadge" class="badge badge-open">OPEN</span>
+      </div>
+
+      <!-- Ticket Steps Progression -->
+      <div class="ticket-steps">
+        <div class="ticket-step" id="step-1">
+          <div class="step-circle">1</div>
+          <div class="step-label">ส่งคำขอแล้ว</div>
+        </div>
+        <div class="ticket-step" id="step-2">
+          <div class="step-circle">2</div>
+          <div class="step-label">ทีมงานรับเรื่อง</div>
+        </div>
+        <div class="ticket-step" id="step-3">
+          <div class="step-circle">3</div>
+          <div class="step-label">ได้รับคำแนะนำ</div>
+        </div>
+      </div>
+
+      <div style="background: var(--gray-100); border-radius: 8px; padding: 12px; font-size: 0.9rem; margin-top: 12px;">
+        <div><strong>รหัสตั๋ว:</strong> <span id="ticketIdDisplay">-</span></div>
+        <div style="margin-top: 4px;"><strong>เรื่อง:</strong> <span id="ticketSummaryDisplay">-</span></div>
+        <div style="margin-top: 4px;"><strong>รายละเอียด:</strong> <span id="ticketDetailDisplay">-</span></div>
+        <div style="margin-top: 4px;"><strong>ระดับความเร่งด่วน:</strong> <span id="ticketPriorityDisplay">-</span></div>
+        <div id="mentorAssignmentArea" style="margin-top: 8px; border-top: 1px solid var(--gray-300); padding-top: 8px; display: none;">
+          <strong>พี่เลี้ยงผู้ดูแล:</strong> <span id="ticketMentorDisplay" style="color: var(--primary); font-weight: 600;">-</span>
+        </div>
+        <div id="mentorResolutionArea" style="margin-top: 8px; background: var(--success-light); padding: 10px; border-radius: 6px; border: 1px solid #86efac; display: none;">
+          <strong style="color: var(--success);">💡 แนวทางก้าวต่อไปจากทีมงาน:</strong>
+          <p id="ticketResolutionDisplay" style="margin-top: 4px; color: #14532d; font-weight: 500;"></p>
+        </div>
+      </div>
+
+      <div class="alert alert-warning" style="margin-top: 14px; margin-bottom: 0;">
+        <span>🔒 <strong>แจ้งเตือน:</strong> คุณมีคำขอที่อยู่ระหว่างดำเนินการ จึงยังไม่สามารถเปิดคำขอใหม่ซ้ำได้ เพื่อให้ทีมงานช่วยแก้ปัญหานี้ให้ลุล่วงก่อน</span>
+      </div>
+    </section>
+
+    <!-- 4. ฟอร์มขอความช่วยเหลือ (SOS Help Ticket Form) -->
+    <section id="helpFormSection" class="card" style="display: none;">
+      <h2 class="card-title">🆘 ขอความช่วยเหลือ (SOS Help Ticket)</h2>
+      <p style="font-size: 0.9rem; color: var(--gray-600); margin-bottom: 16px;">
+        ไม่ต้องกังวลหากคุณติดขัด ทีมพี่เลี้ยง 3 คนพร้อมช่วยคุณก้าวต่อ กรุณากรอกข้อมูลด้านล่างให้ชัดเจนที่สุด
+      </p>
+
+      <form id="ticketForm">
+        <!-- หมวดหมู่ปัญหา -->
+        <div class="form-group">
+          <label for="categorySelect">1. ประเภทปัญหาที่พบ <span style="color: var(--danger);">*</span></label>
+          <select id="categorySelect" required>
+            <option value="">-- กรุณาเลือกประเภทปัญหา --</option>
+            <option value="tools_setup">ติดตั้ง/เปิดใช้เครื่องมือไม่ได้ (Tools Setup)</option>
+            <option value="exercise_stuck">ติดขัดการทำแบบฝึกหัด/โค้ดผิดพลาด (Exercise Stuck)</option>
+            <option value="submission_error">ส่งงาน/บันทึกผลงานไม่สำเร็จ (Submission Issue)</option>
+            <option value="clarification">ไม่เข้าใจคำสั่ง/โจทย์ของการนำไปใช้ (Clarification)</option>
+          </select>
+        </div>
+
+        <!-- กล่อง Self-Triage Checklist แนะนำการแก้ปัญหาเบื้องต้น -->
+        <div style="background: var(--primary-light); border: 1px solid #bfdbfe; border-radius: 8px; padding: 12px; margin-bottom: 16px;">
+          <div style="font-weight: 600; font-size: 0.88rem; color: var(--primary); margin-bottom: 6px;">
+            💡 ลองตรวจสอบ 2 ข้อง่ายๆ ดูก่อน (อาจแก้ได้ทันที):
+          </div>
+          <label class="checklist-item" style="margin-bottom: 0;">
+            <input type="checkbox" id="checkRefresh">
+            <span>ได้ลองรีเฟรชหน้าเว็บ หรือปิด-เปิดเบราว์เซอร์ใหม่แล้ว</span>
+          </label>
+          <label class="checklist-item" style="margin-bottom: 0;">
+            <input type="checkbox" id="checkDevice">
+            <span id="deviceCheckText">ตรวจสอบการเชื่อมต่ออินเทอร์เน็ตหรือแถบข้อความแจ้งเตือนสีแดง</span>
+          </label>
+        </div>
+
+        <!-- หัวข้อสรุปปัญหา -->
+        <div class="form-group">
+          <label for="problemSummary">2. สรุปปัญหาใน 1 บรรทัด <span style="color: var(--danger);">*</span></label>
+          <input type="text" id="problemSummary" placeholder="เช่น กดปุ่มบันทึกไม่ได้ บนมือถือจอแนวตั้ง" required minlength="5">
+          <div class="helper-text">ระบุอาการที่พบสั้นๆ ชัดเจน (อย่างน้อย 5 ตัวอักษร)</div>
+        </div>
+
+        <!-- รายละเอียดปัญหา -->
+        <div class="form-group">
+          <label for="problemDetail">3. รายละเอียดสิ่งที่ติดขัด <span style="color: var(--danger);">*</span></label>
+          <textarea id="problemDetail" rows="4" placeholder="เช่น ทำถึงขั้นตอนที่ 3 ในคลิป แล้วมีข้อความ Error ขึ้นว่า... โดยใช้มือถือระบบ Android" required minlength="10"></textarea>
+          <div class="helper-text">อธิบายหน้าจอที่พบ หรือข้อความแจ้งเตือน เพื่อให้ทีมงานเข้าใจและตอบได้ตรงจุด (อย่างน้อย 10 ตัวอักษร)</div>
+        </div>
+
+        <!-- ระดับความเร่งด่วนตามมุมมองผู้เรียน -->
+        <div class="form-group">
+          <label for="userPriority">4. ระดับความเร่งด่วน</label>
+          <select id="userPriority">
+            <option value="AUTO">ระบบประเมินให้อัตโนมัติ (แนะนำ)</option>
+            <option value="CRITICAL">🔴 เร่งด่วนมาก (ติดขัดจนทำอะไรต่อไม่ได้เลย)</option>
+            <option value="HIGH">🟠 เร่งด่วน (ยังทำส่วนอื่นรอได้นิดหน่อย)</option>
+            <option value="MEDIUM">🟡 ปานกลาง (สอบถามข้อสงสัยทั่วไป)</option>
+          </select>
+        </div>
+
+        <div id="formFeedbackArea" style="margin-bottom: 12px;"></div>
+
+        <button type="submit" class="btn btn-primary btn-block" id="btnSubmitTicket">
+          🚀 ส่งคำขอความช่วยเหลือไปยังทีมพี่เลี้ยง
+        </button>
+      </form>
+    </section>
+
+  </main>
+
+  <script src="mockAdapter.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
