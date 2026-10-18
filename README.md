@@ -1,5 +1,6 @@
 # StepForward (ก้าวต่อ) 🚀
 [![Node.js CI](https://github.com/IbankXD/TIIS-StepForward/actions/workflows/test.yml/badge.svg)](https://github.com/IbankXD/TIIS-StepForward/actions/workflows/test.yml)
+[![GitHub Pages](https://github.com/IbankXD/TIIS-StepForward/actions/workflows/deploy-pages.yml/badge.svg)](https://ibankxd.github.io/TIIS-StepForward/)
 [![Tests Passing](https://img.shields.io/badge/tests-4%2F4%20passing-brightgreen.svg)](https://github.com/IbankXD/TIIS-StepForward)
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D18.0.0-blue.svg)](https://nodejs.org/)
 
@@ -7,6 +8,10 @@
 **บริษัท เทค อินฟินิตี้ อินเตอร์เนชั่นแนล โซลูชั่น จำกัด (TIIS)**  
 **ตำแหน่งที่สมัคร:** Software Developer Trainee  
 **ผู้จัดทำ:** คุณศิวัฒน์ แก้วหนองสังข์  
+
+🌐 **ทดลองใช้งานจริงผ่านเว็บออนไลน์ (Live Demo บน GitHub Pages):**  
+- 📱 **Learner Portal (มุมมองผู้เรียน):** [https://ibankxd.github.io/TIIS-StepForward/](https://ibankxd.github.io/TIIS-StepForward/)
+- 🖥️ **Mentor Triage Dashboard (มุมมองทีมงาน):** [https://ibankxd.github.io/TIIS-StepForward/mentor.html](https://ibankxd.github.io/TIIS-StepForward/mentor.html)  
 
 ---
 
